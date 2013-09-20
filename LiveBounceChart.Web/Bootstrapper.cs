@@ -1,36 +1,21 @@
+using System;
 using System.Web.Mvc;
 using Microsoft.Practices.Unity;
 using Unity.Mvc4;
 
 namespace LiveBounceChart.Web
 {
-  public static class Bootstrapper
-  {
-    public static IUnityContainer Initialise()
+    public static class Bootstrapper
     {
-      var container = BuildUnityContainer();
+        public static IUnityContainer Initialize(Action<IUnityContainer> registerTypes)
+        {
+            var container = new UnityContainer();
 
-      DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            registerTypes(container);
 
-      return container;
+            DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+
+            return container;
+        }
     }
-
-    private static IUnityContainer BuildUnityContainer()
-    {
-      var container = new UnityContainer();
-
-      // register all your components with the container here
-      // it is NOT necessary to register your controllers
-
-      // e.g. container.RegisterType<ITestService, TestService>();    
-      RegisterTypes(container);
-
-      return container;
-    }
-
-    public static void RegisterTypes(IUnityContainer container)
-    {
-    
-    }
-  }
 }

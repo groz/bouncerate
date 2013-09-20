@@ -5,6 +5,8 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using LiveBounceChart.Web.Models;
+using Microsoft.Practices.Unity;
 
 namespace LiveBounceChart.Web
 {
@@ -19,6 +21,13 @@ namespace LiveBounceChart.Web
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+            Bootstrapper.Initialize(RegisterTypes);
+        }
+
+        private void RegisterTypes(IUnityContainer container)
+        {
+            container.RegisterType<IRepository, FileRepository>( new ContainerControlledLifetimeManager(), new InjectionConstructor("1.txt") );
         }
     }
 }
