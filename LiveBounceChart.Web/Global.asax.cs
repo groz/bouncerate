@@ -27,7 +27,8 @@ namespace LiveBounceChart.Web
 
         private void RegisterTypes(IUnityContainer container)
         {
-            container.RegisterType<IRepository, FileRepository>( new ContainerControlledLifetimeManager(), new InjectionConstructor("1.txt") );
+            //container.RegisterType<IRepository, FileRepository>( new ContainerControlledLifetimeManager(), new InjectionConstructor("1.txt") );
+            container.RegisterType<IRepository, MemoryRepository>(new ContainerControlledLifetimeManager());
         }
     }
 }
