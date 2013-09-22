@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel;
 using System.Linq;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using LiveBounceChart.Web.DAL;
+using LiveBounceChart.Web.Infra;
+using Unity.Mvc4;
+using SignalR = Microsoft.AspNet.SignalR;
 using Microsoft.Practices.Unity;
 
 namespace LiveBounceChart.Web
@@ -17,18 +20,27 @@ namespace LiveBounceChart.Web
         {
             AreaRegistration.RegisterAllAreas();
 
-            Bootstrapper.Initialize(RegisterTypes);
+            var container = CreateContainer();
+
+            System.Web.Mvc.DependencyResolver.SetResolver(new UnityDependencyResolver(container));
+            SignalR.GlobalHost.DependencyResolver = new SignalRUnityDependencyResolver(container);
 
             RouteTable.Routes.MapHubs();
-
+            
             WebApiConfig.Register(GlobalConfiguration.Configuration);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
         }
 
-        private void RegisterTypes(IUnityContainer container)
+        private static IUnityContainer CreateContainer()
         {
-            //container.RegisterType<IRepository, FileRepository>( new ContainerControlledLifetimeManager(), new InjectionConstructor("1.txt") );
+            IUnityContainer container = new UnityContainer();
+
+            container.RegisterType<IBounceDB, BounceDBContext>();
+            container.RegisterType<LobbyHub, LobbyHub>();
+
+
+            return container;
         }
     }
 }

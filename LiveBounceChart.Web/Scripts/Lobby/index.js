@@ -3,6 +3,7 @@
 
 $(function () {
 
+
     var onlineUserCount = $("#onlineUserCountSpan"),
         totalUserCount = $("#totalUserCountSpan");
 
@@ -16,8 +17,11 @@ $(function () {
         totalUserCount.text(n);
     };
     
+    
     $.connection.hub.start().done(function() {
-        
+
+        console.log("connected");
+        console.log($.connection);
         // safe to trigger server commands here or hook them to events
 
     });
