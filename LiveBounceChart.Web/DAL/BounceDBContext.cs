@@ -8,14 +8,13 @@ using LiveBounceChart.Web.Models;
 
 namespace LiveBounceChart.Web.DAL
 {
-    public class BounceDBContext: DbContext
+    public class BounceDBContext : DbContext, IBounceDB
     {
-        public DbSet<BounceEntry> BounceEntries { get; set; }
+        public IDbSet<BounceEntry> BounceEntries { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
         }
     }
-
 }
