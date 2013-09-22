@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using LiveBounceChart.Web.Models;
+
 namespace LiveBounceChart.Web.Migrations
 {
     using System;
@@ -14,7 +17,33 @@ namespace LiveBounceChart.Web.Migrations
 
         protected override void Seed(LiveBounceChart.Web.DAL.BounceDBContext context)
         {
-            //  This method will be called after migrating to the latest version.
+            var data = new List<BounceEntry>
+            {
+                new BounceEntry()
+                {
+                    Id = 0,
+                    BouncePeriod = TimeSpan.FromSeconds(5),
+                    UtcExitTime = DateTime.Now
+                },
+
+                new BounceEntry()
+                {
+                    Id = 1,
+                    BouncePeriod = TimeSpan.FromSeconds(25),
+                    UtcExitTime = DateTime.Now
+                },
+
+                new BounceEntry()
+                {
+                    Id = 2,
+                    BouncePeriod = TimeSpan.FromSeconds(13),
+                    UtcExitTime = DateTime.Now
+                },
+            };
+
+            data.ForEach(be => context.BounceEntries.AddOrUpdate(e => e.Id, be));
+
+            context.SaveChanges();
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
             //  to avoid creating duplicate seed data. E.g.

@@ -154,6 +154,10 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Infra\LobbyHub.cs" />
+    <Compile Include="Migrations\201309222123583_InitialSeed.cs" />
+    <Compile Include="Migrations\201309222123583_InitialSeed.Designer.cs">
+      <DependentUpon>201309222123583_InitialSeed.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BounceEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -199,6 +203,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="nvd3.license.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201309222123583_InitialSeed.resx">
+      <DependentUpon>201309222123583_InitialSeed.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
