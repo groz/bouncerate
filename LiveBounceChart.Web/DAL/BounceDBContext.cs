@@ -13,23 +13,24 @@ namespace LiveBounceChart.Web.DAL
     {
         public IDbSet<BounceEntry> BounceEntries { get; set; }
 
-        // http://stackoverflow.com/a/648247
-        public IEnumerable<BounceEntry> GetRandomSample(int sampleSize)
+        public BounceEntry[] RandomSample(int sampleSize, double outliersPercent)
         {
-            var randomSample = (
-                from row in BounceEntries
-                orderby Random()
-                select row)
-                .Take(sampleSize);
+            // TODO: move this to SQL
+            // TODO: limit number of entries retrieved
 
-            return randomSample.AsEnumerable();
-        }
+            BounceEntry[] allEntries = BounceEntries.ToArray();
 
-        [Function(Name = "NEWID", IsComposable = true)]
-        public Guid Random()
-        { 
-            // to prove not used by our C# code... 
-            throw new NotImplementedException();
+            int nOutliers = (int)outliersPercent * Math.Min(sampleSize, allEntries.Length);
+
+            IEnumerable<BounceEntry> sample = allEntries
+                .OrderByDescending(entry => entry.UtcExitTime)
+                .Take(sampleSize + 2 * nOutliers);
+
+            return sample
+                .OrderBy(entry => entry.BouncePeriod)
+                .Skip(nOutliers)
+                .Take(sampleSize - 2 * nOutliers)
+                .ToArray();
         }
 
         int IBounceDB.SaveChanges()

@@ -13,6 +13,8 @@ namespace LiveBounceChart.Web.Infra
     [HubName("lobby")]
     public class LobbyHub : Hub
     {
+        private const int SampleSize = 100;
+        private const double OutliersPercentage = 0.1;
         private readonly IBounceDB _ctx;
         private static readonly ConcurrentDictionary<string, Stopwatch> CurrentCounters = new ConcurrentDictionary<string, Stopwatch>();
 
@@ -28,8 +30,7 @@ namespace LiveBounceChart.Web.Infra
 
         public JsResult[] PrepareData()
         {
-            return _ctx.BounceEntries
-                .AsEnumerable()
+            return _ctx.RandomSample(SampleSize, OutliersPercentage)
                 .Select(be => new JsResult()
                 {
                     BouncePeriod = be.BouncePeriod.TotalSeconds

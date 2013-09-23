@@ -160,6 +160,10 @@
     <Compile Include="Migrations\201309222123583_InitialSeed.Designer.cs">
       <DependentUpon>201309222123583_InitialSeed.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201309230256053_AddedRandomSampleFunc.cs" />
+    <Compile Include="Migrations\201309230256053_AddedRandomSampleFunc.Designer.cs">
+      <DependentUpon>201309230256053_AddedRandomSampleFunc.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\BounceEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -213,6 +217,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201309222123583_InitialSeed.resx">
       <DependentUpon>201309222123583_InitialSeed.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201309230256053_AddedRandomSampleFunc.resx">
+      <DependentUpon>201309230256053_AddedRandomSampleFunc.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -7,7 +7,7 @@ namespace LiveBounceChart.Web.DAL
     public interface IBounceDB
     {
         IDbSet<BounceEntry> BounceEntries { get; set; }
-        IEnumerable<BounceEntry> GetRandomSample(int sampleSize);
+        BounceEntry[] RandomSample(int sampleSize, double outliersPercent);
 
         int SaveChanges();
     }
