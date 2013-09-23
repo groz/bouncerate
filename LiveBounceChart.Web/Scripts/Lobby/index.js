@@ -6,19 +6,24 @@
 
 $(function () {
     
-    var onlineUserCount = $("#onlineUserCountSpan"),
-        totalUserCount = $("#totalUserCountSpan");
+    var viewModel = { 
+        onlineUsers: ko.observable("1"),
+        totalUsers: ko.observable("1"),
+    };
+    
+    ko.applyBindings(viewModel);
     
     var chart = nv.models.lineChart();
+    chart.margin({ left: 80 }); // workaround to show y-axis label
 
     nv.addGraph(function () {
 
         chart.xAxis
-            .axisLabel('Time (s)')
+            .axisLabel('Time (seconds)')
             .tickFormat(d3.format('.2f'));
 
         chart.yAxis
-            .axisLabel('Bounce probability')
+            .axisLabel('Probability')
             .tickFormat(d3.format('.02f'));
 
         nv.utils.windowResize(function () {
@@ -74,11 +79,11 @@ $(function () {
     var hub = $.connection.lobby;
 
     hub.client.updateOnlineUserCount = function (n) {
-        onlineUserCount.text(n);
+        viewModel.onlineUsers(n);
     };
 
     hub.client.updateTotalUserCount = function (n) {
-        totalUserCount.text(n);
+        viewModel.totalUsers(n);
     };
 
     hub.client.updatePlot = function (bounceData) {

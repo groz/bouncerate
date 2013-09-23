@@ -13,14 +13,13 @@
         <link href="~/Content/Lobby/lobby.css" rel="stylesheet" />
     </head>
     <body>
+        <h1>LIKELIHOOD THAT YOU WILL CLOSE THIS TAB</h1>
+
         <svg id="chart"></svg>
 
         <div>
-            Online:
-            <span id="onlineUserCountSpan">1</span>
-            
-            Total:
-            <span id="totalUserCountSpan">1</span>
+            Online: <span data-bind="text: onlineUsers">1</span>
+            Total: <span data-bind="text: totalUsers">1</span>
         </div>
         
         <!-- Script references. -->
