@@ -9,17 +9,26 @@
 <html>
     <head>
         <title>Lobby</title>
+        <link href="~/Content/nv.d3.css" rel="stylesheet" type="text/css" />
+        <link href="~/Content/Lobby/lobby.css" rel="stylesheet" />
     </head>
     <body>
+        <svg id="chart"></svg>
+
         <div>
+            Online:
             <span id="onlineUserCountSpan">1</span>
-            /
+            
+            Total:
             <span id="totalUserCountSpan">1</span>
         </div>
         
         <!-- Script references. -->
         <script src="~/Scripts/jquery-2.0.3.min.js"></script>
-        <script src="~/Scripts/jquery.signalR-1.1.3.js"></script>
+        <script src="~/Scripts/jquery.signalR-1.1.3.min.js"></script>
+        <script src="~/Scripts/knockout-2.3.0.js"></script>
+        <script src="~/Scripts/d3.v3.js"></script>
+        <script src="~/Scripts/nv.d3.js"></script>
         <script src="~/signalr/hubs"></script>
 
         <script src="~/Scripts/Lobby/index.js"></script>

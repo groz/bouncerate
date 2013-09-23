@@ -12,6 +12,11 @@ namespace LiveBounceChart.Web.DAL
     {
         public IDbSet<BounceEntry> BounceEntries { get; set; }
 
+        int IBounceDB.SaveChanges()
+        {
+            return base.SaveChanges();
+        }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();

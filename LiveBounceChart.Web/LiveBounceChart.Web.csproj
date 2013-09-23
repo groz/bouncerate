@@ -168,6 +168,7 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="Content\Lobby\lobby.css" />
     <Content Include="Content\nv.d3.css" />
     <Content Include="Global.asax" />
     <Content Include="LICENSE.txt" />

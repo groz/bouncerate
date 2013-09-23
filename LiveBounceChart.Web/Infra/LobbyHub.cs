@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Web.UI.WebControls.Expressions;
 using LiveBounceChart.Web.DAL;
 using LiveBounceChart.Web.Models;
 using Microsoft.AspNet.SignalR;
@@ -13,20 +14,42 @@ namespace LiveBounceChart.Web.Infra
     public class LobbyHub : Hub
     {
         private readonly IBounceDB _ctx;
-        private static readonly ConcurrentDictionary<string, Stopwatch> Data = new ConcurrentDictionary<string, Stopwatch>();
+        private static readonly ConcurrentDictionary<string, Stopwatch> CurrentCounters = new ConcurrentDictionary<string, Stopwatch>();
 
         public LobbyHub(IBounceDB ctx)
         {
             _ctx = ctx;
         }
 
+        public class JsResult
+        {
+            public double BouncePeriod { get; set; }
+        }
+
+        public JsResult[] PrepareData()
+        {
+            return _ctx.BounceEntries
+                .AsEnumerable()
+                .Select(be => new JsResult()
+                {
+                    BouncePeriod = be.BouncePeriod.TotalSeconds
+                })
+                .ToArray();
+        }
+
+        public void GetCurrentData()
+        {
+            var report = PrepareData();
+            Clients.Caller.updatePlot(report);
+        }
+
         public override System.Threading.Tasks.Task OnConnected()
         {
-            Data[Context.ConnectionId] = Stopwatch.StartNew();
+            CurrentCounters[Context.ConnectionId] = Stopwatch.StartNew();
 
-            Clients.All.updateTotalUserCount(Data.Count);
+            Clients.All.updateTotalUserCount(CurrentCounters.Count);
 
-            var onlineUserCount = Data.Count(d => d.Value.IsRunning);
+            var onlineUserCount = CurrentCounters.Count(d => d.Value.IsRunning);
 
             Clients.All.updateOnlineUserCount(onlineUserCount);
 
@@ -37,7 +60,7 @@ namespace LiveBounceChart.Web.Infra
         {
             Stopwatch stopwatch;
             
-            if (Data.TryGetValue(Context.ConnectionId, out stopwatch))
+            if (CurrentCounters.TryGetValue(Context.ConnectionId, out stopwatch))
             {
                 stopwatch.Stop();
                 
@@ -46,6 +69,11 @@ namespace LiveBounceChart.Web.Infra
                     BouncePeriod = stopwatch.Elapsed,
                     UtcExitTime = DateTime.UtcNow,
                 });
+
+                _ctx.SaveChanges();
+
+                var report = PrepareData();
+                Clients.Others.updatePlot(report);
             }
 
             return base.OnDisconnected();

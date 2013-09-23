@@ -7,10 +7,6 @@ namespace LiveBounceChart.Web.Controllers.Lobby
     {
         private readonly IBounceDB _context;
 
-        public LobbyController()
-        {
-        }
-
         public LobbyController(IBounceDB context)
         {
             _context = context;

@@ -6,5 +6,7 @@ namespace LiveBounceChart.Web.DAL
     public interface IBounceDB
     {
         IDbSet<BounceEntry> BounceEntries { get; set; }
+
+        int SaveChanges();
     }
 }
