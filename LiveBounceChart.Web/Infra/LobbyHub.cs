@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Web.UI.WebControls.Expressions;
 using LiveBounceChart.Web.DAL;
@@ -13,44 +14,54 @@ namespace LiveBounceChart.Web.Infra
     [HubName("lobby")]
     public class LobbyHub : Hub
     {
-        private const int SampleSize = 100;
-        private const double OutliersPercentage = 0.1;
+        private const int SampleSize = 10;
+        private const double OutliersShare = 0.1;
         private readonly IBounceDB _ctx;
-        private static readonly ConcurrentDictionary<string, Stopwatch> CurrentCounters = new ConcurrentDictionary<string, Stopwatch>();
+
+        private static readonly object SyncRoot = new object();
+        private static readonly Dictionary<string, Stopwatch> CurrentCounters = new Dictionary<string, Stopwatch>();
 
         public LobbyHub(IBounceDB ctx)
         {
             _ctx = ctx;
         }
 
-        public class JsResult
+        private void PushDataToClients(dynamic clients)
         {
-            public double BouncePeriod { get; set; }
-        }
-
-        public JsResult[] PrepareData()
-        {
-            return _ctx.RandomSample(SampleSize, OutliersPercentage)
-                .Select(be => new JsResult()
+            var report = _ctx
+                .RandomSample(SampleSize, OutliersShare)
+                .Select(be => new
                 {
                     BouncePeriod = be.BouncePeriod.TotalSeconds
                 })
                 .ToArray();
+
+            clients.updatePlot(report);
         }
 
         public void GetCurrentData()
         {
-            var report = PrepareData();
-            Clients.Caller.updatePlot(report);
+            PushDataToClients(Clients.Caller);
         }
 
         public override System.Threading.Tasks.Task OnConnected()
         {
-            CurrentCounters[Context.ConnectionId] = Stopwatch.StartNew();
+            int totalCount;
 
-            Clients.All.updateTotalUserCount(CurrentCounters.Count);
+            lock (SyncRoot)
+            {
+                CurrentCounters[Context.ConnectionId] = Stopwatch.StartNew();
+                totalCount = CurrentCounters.Count;
+            }
 
-            var onlineUserCount = CurrentCounters.Count(d => d.Value.IsRunning);
+            Clients.All.updateTotalUserCount(totalCount);
+
+            int onlineUserCount;
+
+            lock (SyncRoot)
+            {
+                onlineUserCount = CurrentCounters.Count(d => d.Value.IsRunning);
+            }
 
             Clients.All.updateOnlineUserCount(onlineUserCount);
 
@@ -59,9 +70,15 @@ namespace LiveBounceChart.Web.Infra
 
         public override System.Threading.Tasks.Task OnDisconnected()
         {
+            bool found;
             Stopwatch stopwatch;
+
+            lock (SyncRoot)
+            {
+                found = CurrentCounters.TryGetValue(Context.ConnectionId, out stopwatch);
+            }
             
-            if (CurrentCounters.TryGetValue(Context.ConnectionId, out stopwatch))
+            if (found)
             {
                 stopwatch.Stop();
                 
@@ -73,8 +90,7 @@ namespace LiveBounceChart.Web.Infra
 
                 _ctx.SaveChanges();
 
-                var report = PrepareData();
-                Clients.Others.updatePlot(report);
+                PushDataToClients(Clients.Others);
             }
 
             return base.OnDisconnected();

@@ -95,6 +95,14 @@ $(function () {
         console.log("updatePlot successful.");
     };
     
+    $.connection.hub.logging = true;
+    
+    $.connection.hub.error(function(err) {
+        console.log(err);
+    });
+
+    console.log("SignalR error logging enabled.");
+    
     $.connection.hub.start().done(function () {
         
         console.log("Connected to SignalR...");

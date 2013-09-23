@@ -13,14 +13,14 @@ namespace LiveBounceChart.Web.DAL
     {
         public IDbSet<BounceEntry> BounceEntries { get; set; }
 
-        public BounceEntry[] RandomSample(int sampleSize, double outliersPercent)
+        public BounceEntry[] RandomSample(int sampleSize, double outliersShare)
         {
             // TODO: move this to SQL
             // TODO: limit number of entries retrieved
 
             BounceEntry[] allEntries = BounceEntries.ToArray();
 
-            int nOutliers = (int)outliersPercent * Math.Min(sampleSize, allEntries.Length);
+            var nOutliers = (int)(outliersShare * Math.Min(sampleSize, allEntries.Length));
 
             IEnumerable<BounceEntry> sample = allEntries
                 .OrderByDescending(entry => entry.UtcExitTime)
