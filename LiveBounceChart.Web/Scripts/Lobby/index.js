@@ -78,21 +78,15 @@ $(function () {
     
     var hub = $.connection.lobby;
 
-    hub.client.updateOnlineUserCount = function (n) {
-        viewModel.onlineUsers(n);
-    };
-
-    hub.client.updateTotalUserCount = function (n) {
-        viewModel.totalUsers(n);
+    hub.client.updateUserCount = function (online, total) {
+        viewModel.onlineUsers(online);
+        if (total) {
+            viewModel.totalUsers(total);
+        }
     };
 
     hub.client.updatePlot = function (bounceData) {
-        console.log("updatePlot called from server...");
-        console.log(bounceData);
-
         updateChart(bounceData);
-        
-        console.log("updatePlot successful.");
     };
     
     $.connection.hub.logging = true;
@@ -109,6 +103,23 @@ $(function () {
         
         // safe to trigger server commands here or hook them to events
         hub.server.getCurrentData();
+        
+        function handleDisconnect() {
+            try {
+                hub.server.clientDisconnected();
+            } catch(err) {
+            }
+        }
+
+        window.onbeforeunload = function (e) {
+            console.log(e);
+            handleDisconnect();
+            
+            // uncomment the line below to enable immediate propagation on tab close in IE
+            // but it has to show the alert because IE is awesome like that
+            // return "Unneeded alert";
+        };
+
     });
 
 });

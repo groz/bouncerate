@@ -14,10 +14,11 @@ namespace LiveBounceChart.Web.Infra
     [HubName("lobby")]
     public class LobbyHub : Hub
     {
-        private const int SampleSize = 10;
+        private const int SampleSize = 100;
         private const double OutliersShare = 0.1;
         private readonly IBounceDB _ctx;
 
+        private static volatile int _onlineUsersCount = 0;
         private static readonly object SyncRoot = new object();
         private static readonly Dictionary<string, Stopwatch> CurrentCounters = new Dictionary<string, Stopwatch>();
 
@@ -44,7 +45,7 @@ namespace LiveBounceChart.Web.Infra
             PushDataToClients(Clients.Caller);
         }
 
-        public override System.Threading.Tasks.Task OnConnected()
+        public void ClientConnected()
         {
             int totalCount;
 
@@ -54,21 +55,12 @@ namespace LiveBounceChart.Web.Infra
                 totalCount = CurrentCounters.Count;
             }
 
-            Clients.All.updateTotalUserCount(totalCount);
+            ++_onlineUsersCount;
 
-            int onlineUserCount;
-
-            lock (SyncRoot)
-            {
-                onlineUserCount = CurrentCounters.Count(d => d.Value.IsRunning);
-            }
-
-            Clients.All.updateOnlineUserCount(onlineUserCount);
-
-            return base.OnConnected();
+            Clients.All.updateUserCount(_onlineUsersCount, totalCount);
         }
 
-        public override System.Threading.Tasks.Task OnDisconnected()
+        public void ClientDisconnected()
         {
             bool found;
             Stopwatch stopwatch;
@@ -77,11 +69,11 @@ namespace LiveBounceChart.Web.Infra
             {
                 found = CurrentCounters.TryGetValue(Context.ConnectionId, out stopwatch);
             }
-            
-            if (found)
+
+            if (found && stopwatch.IsRunning) // filter double disconnects
             {
                 stopwatch.Stop();
-                
+
                 _ctx.BounceEntries.Add(new BounceEntry()
                 {
                     BouncePeriod = stopwatch.Elapsed,
@@ -91,8 +83,22 @@ namespace LiveBounceChart.Web.Infra
                 _ctx.SaveChanges();
 
                 PushDataToClients(Clients.Others);
+                --_onlineUsersCount;
             }
+            
+            Clients.Others.updateUserCount(_onlineUsersCount);
+        }
 
+        public override System.Threading.Tasks.Task OnConnected()
+        {
+            ClientConnected();
+            return base.OnConnected();
+        }
+
+        public override System.Threading.Tasks.Task OnDisconnected()
+        {
+            // when connection times out/is lost and something prevented ClientDisconnected
+            ClientDisconnected();
             return base.OnDisconnected();
         }
     }
